@@ -75,7 +75,7 @@ export function OperationsMap({ data, robot }: { data: DashboardSnapshot; robot:
       } else {
         await import("maplibre-gl/dist/maplibre-gl.css");
         lib = await import("maplibre-gl");
-        const workerUrl = (await import("maplibre-gl/dist/maplibre-gl-csp-worker.js?url")).default;
+        const workerUrl = (await import("maplibre-gl/dist/maplibre-gl-worker.mjs?url")).default;
         lib.setWorkerUrl(workerUrl);
         map = new lib.Map({ container, style: ESRI_SATELLITE_STYLE, center, zoom: 15, pitch: 42, bearing: -18, attributionControl: false, maxPitch: 70 });
       }
