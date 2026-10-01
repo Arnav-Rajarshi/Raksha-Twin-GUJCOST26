@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Application data must flow from backend-compatible mock modules through service modules into presentation components, so future API integration does not require UI rewrites.
