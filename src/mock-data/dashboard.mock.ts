@@ -1,3 +1,4 @@
+import cameraFrame from "@/assets/mock-camera-frame.jpg";
 import type { DashboardSnapshot } from "@/models/dashboard";
 
 const baseTimestamp = "2026-10-01T18:54:20.000Z";
@@ -86,8 +87,10 @@ export const dashboardMock: DashboardSnapshot = {
   camera: {
     camera_id: "CAM-01",
     stream_url: null,
+    preview_frame_url: cameraFrame,
+    stream_fps: 30,
     connection_status: "CONNECTED",
-    camera_resolution: "1280 × 720",
+    camera_resolution: "1920 × 1080",
     latest_detection: { type: "PERSON", confidence: 0.94, timestamp: baseTimestamp },
   },
   operatorLocation: { latitude: 30.897, longitude: 75.852 },

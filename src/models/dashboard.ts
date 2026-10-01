@@ -103,6 +103,9 @@ export interface NearbyService {
 export interface CameraState {
   camera_id: string;
   stream_url: string | null;
+  /** Frontend-only mock still frame used until a real stream is available. */
+  preview_frame_url?: string | null;
+  stream_fps?: number;
   connection_status: "CONNECTED" | "DISCONNECTED";
   camera_resolution: string;
   latest_detection: DetectionSummary["latest_detection"];

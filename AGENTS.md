@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Application data must flow from backend-compatible mock modules through service modules into presentation components, so future API integration does not require UI rewrites.
+- Map uses Mapbox GL when VITE_MAPBOX_ACCESS_TOKEN is set, otherwise MapLibre with keyless satellite raster tiles — keeps the map interactive without a key.
