@@ -30,6 +30,16 @@ const ESRI_SATELLITE_STYLE = {
   ],
 };
 
+/** Map engines can't parse oklch; resolve a CSS token to rgb via canvas. */
+function tokenToRgb(token: string) {
+  const ctx = document.createElement("canvas").getContext("2d");
+  if (!ctx) return "#e0a040";
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 function circlePolygon([lng, lat]: [number, number], radiusKm: number) {
   const coords: [number, number][] = [];
   for (let i = 0; i <= 64; i++) {
@@ -65,6 +75,8 @@ export function OperationsMap({ data, robot }: { data: DashboardSnapshot; robot:
       } else {
         await import("maplibre-gl/dist/maplibre-gl.css");
         lib = await import("maplibre-gl");
+        const workerUrl = (await import("maplibre-gl/dist/maplibre-gl-csp-worker.js?url")).default;
+        lib.setWorkerUrl(workerUrl);
         map = new lib.Map({ container, style: ESRI_SATELLITE_STYLE, center, zoom: 15, pitch: 42, bearing: -18, attributionControl: false, maxPitch: 70 });
       }
       if (cancelled) { map.remove(); return; }
@@ -74,9 +86,8 @@ export function OperationsMap({ data, robot }: { data: DashboardSnapshot; robot:
       map.on("zoom", () => setZoom(map.getZoom()));
 
       map.on("load", () => {
-        const styles = getComputedStyle(document.documentElement);
-        const warning = styles.getPropertyValue("--warning").trim();
-        const accent = styles.getPropertyValue("--accent").trim();
+        const warning = tokenToRgb("--warning");
+        const accent = tokenToRgb("--accent");
         map.addSource("mission-area", { type: "geojson", data: circlePolygon(center, 0.9) });
         map.addLayer({ id: "mission-area-fill", type: "fill", source: "mission-area", paint: { "fill-color": accent, "fill-opacity": 0.06 } });
         map.addLayer({ id: "mission-area-line", type: "line", source: "mission-area", paint: { "line-color": accent, "line-width": 1, "line-dasharray": [3, 3] } });
