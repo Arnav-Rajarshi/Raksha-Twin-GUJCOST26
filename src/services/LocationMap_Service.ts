@@ -1,0 +1,2 @@
+import { dashboardMock } from "@/mock-data/dashboard.mock";
+export const getLocationMap = () => ({ path: structuredClone(dashboardMock.path), operatorLocation: structuredClone(dashboardMock.operatorLocation) });
