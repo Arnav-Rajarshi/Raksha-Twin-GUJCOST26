@@ -8,7 +8,7 @@ export function OperationsMap({ data }: { data: DashboardSnapshot }) {
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+    const token = import.meta.env["VITE_MAPBOX_ACCESS_TOKEN"];
     const container = containerRef.current;
     if (!token || !container) return;
     let cancelled = false;
@@ -27,8 +27,10 @@ export function OperationsMap({ data }: { data: DashboardSnapshot }) {
       map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), "bottom-right");
       map.on("load", () => {
         map.addSource("robot-path", { type: "geojson", data: { type: "Feature", properties: {}, geometry: data.path.path } });
-        map.addLayer({ id: "robot-path-glow", type: "line", source: "robot-path", paint: { "line-color": "#f6a52c", "line-width": 8, "line-opacity": 0.22 } });
-        map.addLayer({ id: "robot-path", type: "line", source: "robot-path", paint: { "line-color": "#ffb23f", "line-width": 3, "line-dasharray": [2, 1] } });
+        const styles = getComputedStyle(document.documentElement);
+        const pathColor = styles.getPropertyValue("--warning").trim();
+        map.addLayer({ id: "robot-path-glow", type: "line", source: "robot-path", paint: { "line-color": pathColor, "line-width": 8, "line-opacity": 0.22 } });
+        map.addLayer({ id: "robot-path", type: "line", source: "robot-path", paint: { "line-color": pathColor, "line-width": 3, "line-dasharray": [2, 1] } });
         const marker = document.createElement("div");
         marker.className = "robot-map-marker";
         const image = document.createElement("img");
