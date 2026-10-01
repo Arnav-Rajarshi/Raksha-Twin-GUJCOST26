@@ -81,6 +81,9 @@ export function OperationsMap({ data, robot }: { data: DashboardSnapshot; robot:
       }
       if (cancelled) { map.remove(); return; }
       mapRef.current = map;
+      const w = window.innerWidth, h = window.innerHeight;
+      const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+      if (w > 1100) map.setPadding({ top: 64, left: clamp(w * 0.31, 360, 520) + 16, right: clamp(w * 0.22, 290, 340) + 16, bottom: clamp(h * 0.21, 150, 196) + 16 });
       map.addControl(new lib.NavigationControl({ showCompass: true, visualizePitch: true }), "bottom-right");
       map.addControl(new lib.ScaleControl({ unit: "metric" }), "bottom-right");
       map.on("zoom", () => setZoom(map.getZoom()));
