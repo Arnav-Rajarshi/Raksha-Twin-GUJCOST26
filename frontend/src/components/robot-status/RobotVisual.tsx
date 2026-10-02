@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import robotAsset from "@/assets/raksha_twin_bot.png.asset.json";
+import robotAsset from "@/assets/raksha twin bot svg.png";
 
 /** Rotor hub positions as % of the robot image (1536×1024). */
 const ROTORS = [
@@ -16,7 +16,7 @@ export function RobotVisual({ heading, flying }: { heading: number; flying: bool
       </motion.div>
       <div className="heading-pointer" />
       <motion.div className="robot-body" animate={{ rotateY: ((heading % 360) - 180) / 12, y: flying ? [0, -2, 0] : 0 }} transition={{ rotateY: { type: "spring", stiffness: 50, damping: 16 }, y: { duration: 2.4, repeat: Infinity, ease: "easeInOut" } }}>
-        <img src={robotAsset.url} alt="RAKSHA vehicle" />
+        <img src={robotAsset} alt="RAKSHA vehicle" />
         {ROTORS.map((r, i) => <span key={i} className="rotor" style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%` }}><i /></span>)}
       </motion.div>
       <div className="robot-visual-caption"><span>HDG</span><strong>{String(Math.round(heading)).padStart(3, "0")}°</strong><span>{flying ? "ROTORS ON" : "ROTORS IDLE"}</span></div>

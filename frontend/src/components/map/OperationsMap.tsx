@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { DashboardSnapshot, RobotState } from "@/models/dashboard";
-import markerAsset from "@/assets/Bot_Marker_for_the_Map.png.asset.json";
-import selectedMarkerAsset from "@/assets/Selected_Bot_marker_for_the_map.png.asset.json";
+import markerAsset from "@/assets/Bot Marker for the Map.png";
+import selectedMarkerAsset from "@/assets/Selected Bot marker for the map.png";
 import { formatCoordinate } from "@/utils/formatters";
 
 // Both engines share the subset of the API used here.
@@ -117,7 +117,7 @@ export function OperationsMap({ data, robot }: { data: DashboardSnapshot; robot:
 
         const marker = document.createElement("div");
         marker.className = "robot-map-marker";
-        marker.innerHTML = `<span class="ping"></span><img alt="${robot.robot_id}" src="${markerAsset.url}" />`;
+        marker.innerHTML = `<span class="ping"></span><img alt="${robot.robot_id}" src="${markerAsset}" />`;
         marker.addEventListener("click", () => setSelected((s) => !s));
         robotMarkerRef.current = new lib.Marker({ element: marker, rotationAlignment: "map", rotation: robot.heading })
           .setLngLat(center)
@@ -137,7 +137,7 @@ export function OperationsMap({ data, robot }: { data: DashboardSnapshot; robot:
     marker.setLngLat([robot.location.longitude, robot.location.latitude]);
     marker.setRotation(robot.heading);
     const img = marker.getElement().querySelector("img");
-    if (img) img.src = selected ? selectedMarkerAsset.url : markerAsset.url;
+    if (img) img.src = selected ? selectedMarkerAsset : markerAsset;
     marker.getElement().classList.toggle("is-selected", selected);
   }, [robot, selected, engine]);
 

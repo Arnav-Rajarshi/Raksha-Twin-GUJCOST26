@@ -10,7 +10,7 @@ import { MissionTimeline } from "@/components/mission-log/MissionTimeline";
 import { AlertStrip } from "@/components/alerts/AlertStrip";
 import { useRobotTelemetry } from "@/hooks/useRobotTelemetry";
 import { formatTime } from "@/utils/formatters";
-import botAsset from "@/assets/raksha_twin_bot.png.asset.json";
+import botAsset from "@/assets/raksha twin bot svg.png";
 
 const enter = (x: number, y: number, delay = 0) => ({ initial: { opacity: 0, x, y }, animate: { opacity: 1, x: 0, y: 0 }, transition: { duration: 0.45, ease: "easeOut" as const, delay } });
 
@@ -21,7 +21,7 @@ export function Dashboard({ data }: { data: DashboardSnapshot }) {
       <OperationsMap data={data} robot={robot} />
       <div className="console-grid">
         <header className="command-bar">
-          <div className="brand-lockup"><img src={botAsset.url} alt="" /><div><strong>RAKSHA<span>—TWIN</span></strong><small>HYBRID RESPONSE SYSTEM</small></div></div>
+          <div className="brand-lockup"><img src={botAsset} alt="" /><div><strong>RAKSHA<span>—TWIN</span></strong><small>HYBRID RESPONSE SYSTEM</small></div></div>
           <div className="bar-cell"><small>MISSION</small><strong>{data.mission.name}</strong><code>{data.mission.mission_id}</code></div>
           <div className="bar-cell"><small>STATUS</small><strong className="healthy-text"><i className="live-dot" />{data.mission.status}</strong></div>
           <div className="bar-cell"><small>SECTOR</small><strong>{data.mission.sector}</strong></div>
