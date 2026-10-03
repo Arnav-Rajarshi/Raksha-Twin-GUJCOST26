@@ -1,16 +1,12 @@
 from fastapi import APIRouter , HTTPException
-from backend.services.OpenMeteo_service import fetch_openmeteo_data
+from services.OpenMeteo_service import fetch_openmeteo_data
+from services.weather_service import refresh_weather
 MapRoutes = APIRouter()
 
 
-@MapRoutes.get("/openmeteo")
+@MapRoutes.get("/current_weather_data")
 async def get_openmeteo_data():
     try:
-
-        latitude =  31.25 # replace with logic to import from the robot 
-        longitude = 75.71 
-
-        data = fetch_openmeteo_data(latitude,longitude)
-        return data
+        return refresh_weather()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

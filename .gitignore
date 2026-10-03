@@ -2,3 +2,5 @@ frontend/node_modules
 .venv/
 .cache.sqlite
 __pycache__/
+.vscode/
+backend.zip

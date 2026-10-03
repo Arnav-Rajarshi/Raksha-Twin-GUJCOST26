@@ -25,10 +25,12 @@ def fetch_openmeteo_data(latitude:float,longitude:float) -> OpenMeteoResponseMod
 
 	# Process first location. Add a for-loop for multiple locations or weather models
 	response = responses[0]
+	"""
 	print(f"Coordinates: {response.Latitude()}°N {response.Longitude()}°E")
 	print(f"Elevation: {response.Elevation()} m asl")
 	print(f"Timezone: {response.Timezone()}{response.TimezoneAbbreviation()}")
 	print(f"Timezone difference to GMT+0: {response.UtcOffsetSeconds()}s")
+	"""
 
 	# Process current data. The order of variables needs to be the same as requested.
 	current = response.Current()
@@ -54,6 +56,11 @@ def fetch_openmeteo_data(latitude:float,longitude:float) -> OpenMeteoResponseMod
 	"""
 
 	return OpenMeteoResponseModel(
+		latitude=response.Latitude(),
+    	longitude=response.Longitude(),
+
+   		observed_at=str(current.Time()),
+           
 		surface_pressure=current_surface_pressure,
 		temperature_2m=current_temperature_2m,
 		relative_humidity_2m=current_relative_humidity_2m,
@@ -64,4 +71,4 @@ def fetch_openmeteo_data(latitude:float,longitude:float) -> OpenMeteoResponseMod
 	)
 
 
-print(fetch_openmeteo_data(35.25, 70.71).model_dump())
+print(fetch_openmeteo_data(35.25, 75.71).model_dump())

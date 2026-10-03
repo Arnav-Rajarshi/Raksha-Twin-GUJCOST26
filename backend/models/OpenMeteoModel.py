@@ -1,6 +1,11 @@
 from pydantic import BaseModel 
 
 class OpenMeteoResponseModel(BaseModel):
+    latitude: float
+    longitude: float
+
+    observed_at: str
+    
     surface_pressure: float
     temperature_2m: float
     relative_humidity_2m: float
