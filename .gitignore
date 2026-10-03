@@ -4,3 +4,6 @@ frontend/node_modules
 __pycache__/
 .vscode/
 backend.zip
+.env/
+.env.*.env.local
+backend/.env.local
