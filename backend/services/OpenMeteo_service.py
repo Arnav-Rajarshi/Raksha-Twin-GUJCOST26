@@ -71,4 +71,4 @@ def fetch_openmeteo_data(latitude:float,longitude:float) -> OpenMeteoResponseMod
 	)
 
 
-print(fetch_openmeteo_data(35.25, 75.71).model_dump())
+#print(fetch_openmeteo_data(35.25, 75.71).model_dump())

@@ -1,7 +1,7 @@
 # this keeps the openMeteo responsible for only communicating with openMeteo 
 import datetime
 
-from backend.services.OpenMeteo_service import fetch_openmeteo_data
+from services.OpenMeteo_service import fetch_openmeteo_data
 from services.robot_service import get_robot_location
 
 def transform_weather_data(OpenMeteoResponseModel)-> dict:
