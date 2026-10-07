@@ -4,11 +4,6 @@ import { formatTime } from "@/utils/formatters";
 
 const hazardTone = (s: EnvironmentState["hazard_status"]) => (s === "CRITICAL" ? "critical" : s === "WARNING" ? "warning" : "healthy");
 const compass = (deg: number) => ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(deg / 45) % 8];
-const response = await fetch(
-    "/api/openmeteo/current_weather_data"
-  );
-
-const weather = await response.json();
 
 export async function EnvironmentPanel({ onboard, weather }: { onboard: EnvironmentState; weather: WeatherState }) {
 

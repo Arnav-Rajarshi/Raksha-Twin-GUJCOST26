@@ -20,7 +20,7 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
     operatorLocation: map.operatorLocation,
     camera: getCameraFeed(),
     environment: getEnvironment(),
-    weather: getWeather(),
+    weather: await getWeather(),
     detections: getDetections(),
     events: getMissionEvents(),
     alerts: getActiveAlerts(),

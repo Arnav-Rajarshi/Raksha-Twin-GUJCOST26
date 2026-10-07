@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import openmeteo_requests
 
 import pandas as pd
@@ -54,7 +55,7 @@ def fetch_openmeteo_data(latitude:float,longitude:float) -> OpenMeteoResponseMod
 	print(f"Current weather_code: {current_weather_code}")
 	print(f"Current wind_direction_10m: {current_wind_direction_10m}")
 	"""
-
+	
 	return OpenMeteoResponseModel(
 		latitude=response.Latitude(),
     	longitude=response.Longitude(),

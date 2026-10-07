@@ -15,7 +15,7 @@ export const dashboardMock: DashboardSnapshot = {
   robot: {
     robot_id: "RAKSHA-01",
     mission_id: "MISSION-001",
-    location: { latitude: 30.901, longitude: 75.8573, altitude: 42.5 },
+    location: { latitude: 21.76, longitude: 72.15, altitude: 42.5 },
     speed: 8.4,
     heading: 184,
     orientation: { roll: 1.2, pitch: -0.8, yaw: 185.4 },

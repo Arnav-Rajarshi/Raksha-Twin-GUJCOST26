@@ -1,10 +1,11 @@
 from fastapi import APIRouter , HTTPException
 from services.OpenMeteo_service import fetch_openmeteo_data
 from services.weather_service import refresh_weather
-MapRoutes = APIRouter()
+
+map_router = APIRouter()
 
 
-@MapRoutes.get("/current_weather_data")
+@map_router.get("/current_weather_data")
 async def get_openmeteo_data():
     try:
         return refresh_weather()

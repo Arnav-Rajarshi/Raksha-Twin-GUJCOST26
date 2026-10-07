@@ -1,22 +1,29 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from routes.missions_routes import missions_router
-from routes.openMeteo_routes import MapRoutes
 from db.mongoDB import client
 
+
+from db.setup import create_collections
+from routes.missions_routes import missions_router
+from routes.openMeteo_routes import map_router
+from routes.telemetry_routes import telemetry_router
+from routes.sensor_routes import sensor_router
+
+#-----------------------------------------------------------------------------------
 #-- New concept :- ContextManager --#
 from db.indexes import create_indexes
 from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 1. SETUP (Runs BEFORE your API accepts any traffic)
+    await create_collections()  # Ensure collections are created before the API starts
     await create_indexes()
 
     yield  # 2. PAUSE (The API is now running and serving requests)
 
     # 3. TEARDOWN (Runs AFTER the server stops / shuts down)
     # (e.g., await client.close())
+#-----------------------------------------------------------------------------------
 
 
 app = FastAPI(
@@ -53,6 +60,7 @@ async def health_check():
 
 
 
-
-app.include_router(router=MapRoutes, prefix="/api/openmeteo") 
+app.include_router(router=map_router, prefix="/api/openmeteo") 
 app.include_router(router=missions_router, prefix="/missions")
+app.include_router(router=telemetry_router, prefix="/telemetry")
+app.include_router(router=sensor_router, prefix="/sensor")
