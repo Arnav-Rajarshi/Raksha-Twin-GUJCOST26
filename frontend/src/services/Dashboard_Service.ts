@@ -19,8 +19,8 @@ interface BackendDashboardPayload {
 let lastValidSnapshot: DashboardSnapshot | null = null;
 
 export async function getDashboardSnapshot(
-  robotId: string = "RAKSHA-01",
-  missionId: string = "MISSION-001"
+  robotId: string = "RT001",
+  missionId: string = "MI007"
 ): Promise<DashboardSnapshot> {
   try {
     const [backendData, weather] = await Promise.all([
@@ -28,7 +28,7 @@ export async function getDashboardSnapshot(
       getWeather().catch((err) => {
         console.warn("Weather fetch failed, utilizing fallback:", err);
         return {
-          location: { latitude: 30.901, longitude: 75.8573 },
+          location: { latitude: 21.7847, longitude: 72.0782 },
           source: "Open-Meteo" as const,
           fetched_at: new Date().toISOString(),
           observed_at: new Date().toISOString(),
@@ -46,6 +46,11 @@ export async function getDashboardSnapshot(
       }),
     ]);
 
+    const opCoords = backendData.path?.path?.coordinates?.[0];
+    const operatorLocation = opCoords
+      ? { latitude: opCoords[1], longitude: opCoords[0] }
+      : { latitude: 21.7838, longitude: 72.0771 };
+
     const snapshot: DashboardSnapshot = {
       mission: backendData.mission,
       robot: backendData.robot,
@@ -57,7 +62,7 @@ export async function getDashboardSnapshot(
       alerts: backendData.alerts,
       nearbyServices: backendData.nearbyServices,
       camera: getCameraFeed(),
-      operatorLocation: structuredClone(dashboardMock.operatorLocation),
+      operatorLocation,
       snapshotState: "LIVE",
     };
 

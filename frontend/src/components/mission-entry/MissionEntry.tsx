@@ -23,8 +23,8 @@ interface MissionEntryProps {
 }
 
 export function MissionEntry({
-  initialRobotId = "RAKSHA-01",
-  initialMissionId = "MISSION-001",
+  initialRobotId = "RT001",
+  initialMissionId = "MI007",
   onSelectMission,
   errorMessage: initialError,
 }: MissionEntryProps) {
@@ -119,7 +119,7 @@ export function MissionEntry({
                     type="text"
                     value={robotId}
                     onChange={(e) => setRobotId(e.target.value.toUpperCase())}
-                    placeholder="e.g. RAKSHA-01"
+                    placeholder="e.g. RT001"
                     required
                     disabled={isValidating}
                   />
@@ -136,7 +136,7 @@ export function MissionEntry({
                     type="text"
                     value={missionId}
                     onChange={(e) => setMissionId(e.target.value.toUpperCase())}
-                    placeholder="e.g. MISSION-001"
+                    placeholder="e.g. MI007"
                     required
                     disabled={isValidating}
                   />

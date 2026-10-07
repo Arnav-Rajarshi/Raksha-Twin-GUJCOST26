@@ -10,6 +10,7 @@ import { AlertTriangle, RefreshCw, ArrowLeft } from "lucide-react";
 const searchSchema = z.object({
   robot: z.string().optional(),
   mission: z.string().optional(),
+  entry: z.string().optional(),
 });
 
 export const Route = createFileRoute("/")({
@@ -41,8 +42,9 @@ function IndexPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const selectedRobot = search.robot;
-  const selectedMission = search.mission;
+  const isEntryExplicit = search.entry === "true";
+  const selectedRobot = isEntryExplicit ? undefined : (search.robot || "RT001");
+  const selectedMission = isEntryExplicit ? undefined : (search.mission || "MI007");
 
   useEffect(() => {
     if (selectedRobot && selectedMission) {
@@ -73,6 +75,7 @@ function IndexPage() {
       search: {
         robot: robotId,
         mission: missionId,
+        entry: undefined,
       },
     });
   };
@@ -80,6 +83,7 @@ function IndexPage() {
   const handleReturnToEntry = () => {
     navigate({
       search: {
+        entry: "true",
         robot: undefined,
         mission: undefined,
       },
@@ -146,8 +150,8 @@ function IndexPage() {
   // Default: First-Entry Mission Selector Screen
   return (
     <MissionEntry
-      initialRobotId={selectedRobot || "RAKSHA-01"}
-      initialMissionId={selectedMission || "MISSION-001"}
+      initialRobotId={search.robot || "RT001"}
+      initialMissionId={search.mission || "MI007"}
       onSelectMission={handleSelectMission}
       errorMessage={loadError}
     />

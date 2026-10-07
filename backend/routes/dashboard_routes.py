@@ -134,10 +134,13 @@ async def get_dashboard_data(robot_id: str, mission_id: str):
             )
 
         # 5. Detection Summary
-        detection_doc = await db.detection_summary.find_one({
-            "robot_id": robot_id,
-            "mission_id": mission_id,
-        })
+        detection_doc = await db.detection_summary.find_one(
+            {
+                "robot_id": robot_id,
+                "mission_id": mission_id,
+            },
+            sort=[("updated_at", -1), ("latest_detection.timestamp", -1)],
+        )
         if detection_doc:
             detections = transform_detection_doc(detection_doc)
         else:

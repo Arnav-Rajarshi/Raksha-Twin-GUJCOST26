@@ -51,6 +51,7 @@ async def save_detection_summary(data: DetectionSummaryCreate):
             updated_at = updated_at.replace(tzinfo=timezone.utc)
 
         doc = {
+            "detection_summary_id": f"{data.robot_id}-{data.mission_id}-{updated_at.strftime('%Y%m%d%H%M%S%f')}",
             "robot_id": data.robot_id,
             "mission_id": data.mission_id,
             "person_count": data.person_count,
@@ -64,11 +65,7 @@ async def save_detection_summary(data: DetectionSummaryCreate):
             "updated_at": updated_at,
         }
 
-        await db.detection_summary.update_one(
-            {"robot_id": data.robot_id, "mission_id": data.mission_id},
-            {"$set": doc},
-            upsert=True,
-        )
+        await db.detection_summary.insert_one(doc)
 
         return {"message": "Detection summary updated successfully."}
 
@@ -81,10 +78,13 @@ async def save_detection_summary(data: DetectionSummaryCreate):
 @detection_router.get("/latest/{robot_id}/{mission_id}", response_model=DetectionSummaryResponse)
 async def get_latest_detection_summary(robot_id: str, mission_id: str):
     try:
-        doc = await db.detection_summary.find_one({
-            "robot_id": robot_id,
-            "mission_id": mission_id,
-        })
+        doc = await db.detection_summary.find_one(
+            {
+                "robot_id": robot_id,
+                "mission_id": mission_id,
+            },
+            sort=[("updated_at", -1), ("latest_detection.timestamp", -1)],
+        )
 
         if doc is None:
             raise HTTPException(

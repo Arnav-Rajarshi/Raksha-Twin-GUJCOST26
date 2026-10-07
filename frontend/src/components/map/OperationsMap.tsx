@@ -76,14 +76,20 @@ interface OperationsMapProps {
   data: DashboardSnapshot;
   robot: RobotState;
   receded?: boolean;
+  onMapClick?: () => void;
 }
 
-export function OperationsMap({ data, robot, receded = false }: OperationsMapProps) {
+export function OperationsMap({
+  data,
+  robot,
+  receded = false,
+  onMapClick,
+}: OperationsMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<AnyMap | null>(null);
   const robotMarkerRef = useRef<AnyMarker | null>(null);
   const [engine, setEngine] = useState<"mapbox" | "maplibre" | null>(null);
-  const [zoom, setZoom] = useState(15);
+  const [zoom, setZoom] = useState(15.5);
   const [selected, setSelected] = useState(false);
 
   // Initialize Map
@@ -94,8 +100,8 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
     let cancelled = false;
 
     const center: [number, number] = [
-      robot.location?.longitude || 75.8573,
-      robot.location?.latitude || 30.901,
+      robot.location?.longitude ?? data.path?.path?.coordinates?.slice(-1)[0]?.[0] ?? 72.0782,
+      robot.location?.latitude ?? data.path?.path?.coordinates?.slice(-1)[0]?.[1] ?? 21.7847,
     ];
 
     const load = async () => {
@@ -110,10 +116,18 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
           container,
           style: "mapbox://styles/mapbox/satellite-streets-v12",
           center,
-          zoom: 15,
+          zoom: 15.5,
           pitch: 42,
           bearing: -18,
           attributionControl: false,
+          interactive: true,
+          dragPan: true,
+          scrollZoom: true,
+          boxZoom: true,
+          dragRotate: true,
+          keyboard: true,
+          doubleClickZoom: true,
+          touchZoomRotate: true,
         }) as unknown as AnyMap;
       } else {
         await import("maplibre-gl/dist/maplibre-gl.css");
@@ -124,11 +138,19 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
           container,
           style: ESRI_SATELLITE_STYLE,
           center,
-          zoom: 15,
+          zoom: 15.5,
           pitch: 42,
           bearing: -18,
           attributionControl: false,
           maxPitch: 70,
+          interactive: true,
+          dragPan: true,
+          scrollZoom: true,
+          boxZoom: true,
+          dragRotate: true,
+          keyboard: true,
+          doubleClickZoom: true,
+          touchZoomRotate: true,
         });
       }
 
@@ -142,12 +164,12 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
         const w = window.innerWidth;
         const h = window.innerHeight;
         const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-        if (w > 1100 && !receded) {
+        if (w > 1024 && !receded) {
           map.setPadding({
             top: 64,
-            left: clamp(w * 0.31, 360, 520) + 16,
-            right: clamp(w * 0.22, 290, 340) + 16,
-            bottom: clamp(h * 0.21, 150, 196) + 16,
+            left: clamp(w * 0.18, 260, 290) + 16,
+            right: clamp(w * 0.18, 250, 280) + 16,
+            bottom: clamp(h * 0.18, 140, 180) + 16,
           });
         } else {
           map.setPadding({ top: 16, left: 16, right: 16, bottom: 16 });
@@ -161,6 +183,13 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
       );
       map.addControl(new lib.ScaleControl({ unit: "metric" }), "bottom-right");
       map.on("zoom", () => setZoom(map.getZoom()));
+      map.on("move", () => setZoom(map.getZoom()));
+
+      map.on("click", () => {
+        if (receded && onMapClick) {
+          onMapClick();
+        }
+      });
 
       map.on("load", () => {
         const warning = tokenToRgb("--warning");
@@ -226,13 +255,18 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
           },
         });
 
-        // Operator Marker (Demo / mock-backed)
-        if (data.operatorLocation) {
+        // Operator Marker
+        const opLocation = data.operatorLocation || (data.path?.path?.coordinates?.[0] ? {
+          longitude: data.path.path.coordinates[0][0],
+          latitude: data.path.path.coordinates[0][1],
+        } : null);
+
+        if (opLocation) {
           const op = document.createElement("div");
           op.className = "operator-marker";
           op.innerHTML = "<i></i><span>OPS 01</span>";
           new lib.Marker({ element: op })
-            .setLngLat([data.operatorLocation.longitude, data.operatorLocation.latitude])
+            .setLngLat([opLocation.longitude, opLocation.latitude])
             .addTo(map);
         }
 
@@ -257,11 +291,14 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
             .addTo(map);
         });
 
-        // Robot Live Marker
+        // Robot Live Marker at latest robot location
         const marker = document.createElement("div");
         marker.className = "robot-map-marker";
         marker.innerHTML = `<span class="ping"></span><img alt="${robot.robot_id}" src="${markerAsset}" />`;
-        marker.addEventListener("click", () => setSelected((s) => !s));
+        marker.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setSelected((s) => !s);
+        });
 
         robotMarkerRef.current = new lib.Marker({
           element: marker,
@@ -318,31 +355,50 @@ export function OperationsMap({ data, robot, receded = false }: OperationsMapPro
     }
   }, [data.path]);
 
-  // Handle resize when entering / exiting Camera focus
+  // Handle resize and padding when entering / exiting Camera focus
   useEffect(() => {
     const timer = setTimeout(() => {
-      mapRef.current?.resize();
+      const map = mapRef.current;
+      if (!map) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+      if (w > 1024 && !receded) {
+        map.setPadding({
+          top: 64,
+          left: clamp(w * 0.18, 260, 290) + 16,
+          right: clamp(w * 0.18, 250, 280) + 16,
+          bottom: clamp(h * 0.18, 140, 180) + 16,
+        });
+      } else {
+        map.setPadding({ top: 16, left: 16, right: 16, bottom: 16 });
+      }
+      map.resize();
     }, 300);
     return () => clearTimeout(timer);
   }, [receded]);
 
   const recenter = useCallback(() => {
-    if (!robot.location) return;
+    const lng = robot.location?.longitude ?? data.path?.path?.coordinates?.slice(-1)[0]?.[0] ?? 72.0782;
+    const lat = robot.location?.latitude ?? data.path?.path?.coordinates?.slice(-1)[0]?.[1] ?? 21.7847;
     mapRef.current?.flyTo({
-      center: [robot.location.longitude, robot.location.latitude],
+      center: [lng, lat],
       zoom: 15.5,
       duration: 800,
     });
-  }, [robot.location?.latitude, robot.location?.longitude]);
+  }, [robot.location?.latitude, robot.location?.longitude, data.path]);
 
   return (
-    <div className={`map-stage ${receded ? "is-receded-map" : ""}`}>
+    <div
+      className={`map-stage ${receded ? "is-receded-map" : ""}`}
+      onClick={receded ? onMapClick : undefined}
+    >
       <div ref={containerRef} className="map-canvas" />
       {!engine && <div className="map-loading">ACQUIRING SATELLITE IMAGERY…</div>}
       <div className="map-hud">
         <div className="coordinates-readout">
-          <span>{formatCoordinate(robot.location?.latitude || 0, "lat")}</span>
-          <span>{formatCoordinate(robot.location?.longitude || 0, "lng")}</span>
+          <span>{formatCoordinate(robot.location?.latitude || 21.7847, "lat")}</span>
+          <span>{formatCoordinate(robot.location?.longitude || 72.0782, "lng")}</span>
           <span>Z {zoom.toFixed(1)}</span>
         </div>
         <button type="button" className="recenter" onClick={recenter}>

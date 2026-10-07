@@ -592,12 +592,14 @@ button {
   inset: 0;
   background: var(--map-base);
   filter: brightness(var(--map-brightness, 0.7));
-  transition: filter 0.5s ease;
+  transition: filter 0.5s ease, opacity 0.5s ease;
+  pointer-events: auto;
 }
 
 .map-stage.is-receded-map {
-  filter: brightness(0.35) blur(1px);
-  opacity: 0.45;
+  filter: brightness(0.55);
+  opacity: 0.8;
+  cursor: pointer;
 }
 
 .map-stage .map-canvas {
@@ -605,6 +607,7 @@ button {
   inset: 0;
   width: 100%;
   height: 100%;
+  pointer-events: auto;
 }
 
 .map-loading {
@@ -616,6 +619,7 @@ button {
   letter-spacing: 0.14em;
   color: var(--muted-foreground);
   animation: live-pulse 1.4s infinite;
+  pointer-events: none;
 }
 
 .console-grid {
@@ -630,20 +634,25 @@ button {
 }
 
 .console-grid > * {
-  pointer-events: auto;
   min-height: 0;
+  pointer-events: none;
+}
+
+.command-bar {
+  pointer-events: auto;
 }
 
 .normal-layout-container {
   flex: 1;
   display: grid;
   gap: 8px;
-  grid-template-columns: clamp(340px, 30vw, 480px) 1fr clamp(290px, 22vw, 340px);
-  grid-template-rows: minmax(0, 1fr) clamp(150px, 21vh, 196px);
+  grid-template-columns: clamp(260px, 18vw, 290px) 1fr clamp(250px, 18vw, 280px);
+  grid-template-rows: minmax(0, 1fr) clamp(140px, 18vh, 180px);
   grid-template-areas:
     "left map right"
     "bottom bottom right";
   min-height: 0;
+  pointer-events: none;
 }
 
 .left-stack {
@@ -652,6 +661,11 @@ button {
   flex-direction: column;
   gap: 8px;
   min-height: 0;
+  pointer-events: none;
+}
+
+.left-stack > * {
+  pointer-events: auto;
 }
 
 .right-stack {
@@ -661,14 +675,24 @@ button {
   gap: 8px;
   overflow-y: auto;
   scrollbar-width: none;
+  pointer-events: none;
+}
+
+.right-stack > * {
+  pointer-events: auto;
 }
 
 .bottom-stack {
   grid-area: bottom;
   display: grid;
-  grid-template-columns: 1fr clamp(260px, 24vw, 340px);
+  grid-template-columns: 1fr clamp(250px, 22vw, 320px);
   gap: 8px;
   min-height: 0;
+  pointer-events: none;
+}
+
+.bottom-stack > * {
+  pointer-events: auto;
 }
 
 /* ==================================================
@@ -683,13 +707,15 @@ button {
   height: auto;
   min-height: 100vh;
   overflow-y: auto;
+  pointer-events: none;
 }
 
 .camera-focus-container {
   display: grid;
-  grid-template-columns: clamp(260px, 22vw, 320px) 1fr clamp(280px, 22vw, 320px);
+  grid-template-columns: clamp(260px, 18vw, 290px) 1fr clamp(250px, 18vw, 280px);
   gap: 8px;
   min-height: calc(100vh - 64px);
+  pointer-events: none;
 }
 
 .camera-focus-left {
@@ -697,12 +723,22 @@ button {
   flex-direction: column;
   gap: 8px;
   min-height: 0;
+  pointer-events: none;
+}
+
+.camera-focus-left > * {
+  pointer-events: auto;
 }
 
 .camera-hero-section {
   display: flex;
   flex-direction: column;
   min-height: 520px;
+  pointer-events: none;
+}
+
+.camera-hero-section > * {
+  pointer-events: auto;
 }
 
 .camera-hero-section .camera-panel {
@@ -716,6 +752,11 @@ button {
   gap: 8px;
   overflow-y: auto;
   scrollbar-width: none;
+  pointer-events: none;
+}
+
+.camera-focus-right > * {
+  pointer-events: auto;
 }
 
 .camera-focus-bottom {
@@ -725,6 +766,11 @@ button {
   gap: 6px;
   margin-top: 8px;
   padding-bottom: 24px;
+  pointer-events: none;
+}
+
+.camera-focus-bottom > * {
+  pointer-events: auto;
 }
 
 .bottom-fold-header {
@@ -1688,10 +1734,11 @@ small, .mono, time, code, dt {
 .map-hud {
   position: absolute;
   z-index: 3;
-  left: calc(clamp(340px, 30vw, 480px) + 20px);
+  left: calc(clamp(260px, 18vw, 290px) + 16px);
   top: 66px;
   display: flex;
   gap: 6px;
+  pointer-events: auto;
 }
 .coordinates-readout, .recenter, .map-legend {
   background: var(--card);
@@ -1699,6 +1746,7 @@ small, .mono, time, code, dt {
   font: 500 9px var(--font-mono);
   letter-spacing: 0.08em;
   color: var(--secondary-foreground);
+  pointer-events: auto;
 }
 .coordinates-readout {
   display: flex;
@@ -1716,11 +1764,12 @@ small, .mono, time, code, dt {
 .map-legend {
   position: absolute;
   z-index: 3;
-  right: calc(clamp(290px, 22vw, 340px) + 70px);
-  bottom: calc(clamp(150px, 21vh, 196px) + 24px);
+  right: calc(clamp(250px, 18vw, 280px) + 70px);
+  bottom: calc(clamp(140px, 18vh, 180px) + 20px);
   display: flex;
   gap: 10px;
   padding: 5px 8px;
+  pointer-events: auto;
 }
 .map-legend span {
   display: flex;
@@ -1738,18 +1787,21 @@ small, .mono, time, code, dt {
 .legend-op { background: var(--healthy); width: 8px !important; height: 8px !important; }
 
 .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right {
-  right: calc(clamp(290px, 22vw, 340px) + 16px) !important;
-  bottom: calc(clamp(150px, 21vh, 196px) + 16px) !important;
+  right: calc(clamp(250px, 18vw, 280px) + 16px) !important;
+  bottom: calc(clamp(140px, 18vh, 180px) + 16px) !important;
+  pointer-events: auto !important;
 }
 .maplibregl-ctrl-group, .mapboxgl-ctrl-group {
   background: var(--card) !important;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm) !important;
   box-shadow: none !important;
+  pointer-events: auto !important;
 }
 .maplibregl-ctrl-group button, .mapboxgl-ctrl-group button {
   width: 28px !important;
   height: 28px !important;
+  pointer-events: auto !important;
 }
 .maplibregl-ctrl-group button + button, .mapboxgl-ctrl-group button + button {
   border-top: 1px solid var(--border) !important;
@@ -1762,6 +1814,7 @@ small, .mono, time, code, dt {
   color: var(--secondary-foreground) !important;
   border-color: var(--muted-foreground) !important;
   font: 500 8.5px var(--font-mono) !important;
+  pointer-events: auto !important;
 }
 
 .robot-map-marker {
@@ -1771,6 +1824,8 @@ small, .mono, time, code, dt {
   display: grid;
   place-items: center;
   cursor: pointer;
+  z-index: 10 !important;
+  pointer-events: auto;
 }
 .robot-map-marker img {
   position: relative;

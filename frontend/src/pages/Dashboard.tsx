@@ -68,7 +68,12 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
       }`}
     >
       {/* Background Map Component */}
-      <OperationsMap data={data} robot={robot} receded={viewMode === "CAMERA"} />
+      <OperationsMap
+        data={data}
+        robot={robot}
+        receded={viewMode === "CAMERA"}
+        onMapClick={() => setViewMode("MAP")}
+      />
 
       {/* Main Console Grid */}
       <div className={`console-grid ${viewMode === "CAMERA" ? "console-grid-camera" : ""}`}>
