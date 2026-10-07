@@ -15,7 +15,7 @@ async def seed_database():
     base_time = datetime.now(timezone.utc) - timedelta(minutes=72)
 
     # 1. Mission
-    print("Seeding mission...")
+    print("Seeding missions...")
     await db.missions.update_one(
         {"mission_id": mission_id},
         {
@@ -31,6 +31,23 @@ async def seed_database():
         },
         upsert=True
     )
+
+    await db.missions.update_one(
+        {"mission_id": "MISSION-002"},
+        {
+            "$set": {
+                "mission_id": "MISSION-002",
+                "name": "Urban Recon Alpha",
+                "robot_id": robot_id,
+                "status": "COMPLETE",
+                "sector": "Sector 03 / Civil Lines",
+                "started_at": base_time - timedelta(days=1),
+                "ended_at": base_time - timedelta(days=1, hours=-2),
+            }
+        },
+        upsert=True
+    )
+
 
     # 2. Telemetry path & history
     print("Seeding telemetry points...")

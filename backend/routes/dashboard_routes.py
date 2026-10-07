@@ -29,19 +29,22 @@ async def get_dashboard_data(robot_id: str, mission_id: str):
         now_utc = datetime.now(timezone.utc)
         now_iso = now_utc.isoformat()
 
-        # 1. Mission
+        # 1. Mission Validation
         mission_doc = await db.missions.find_one({"mission_id": mission_id})
-        if mission_doc:
-            mission = transform_mission_doc(mission_doc)
-        else:
-            mission = MissionResponse(
-                mission_id=mission_id,
-                name=f"Mission {mission_id}",
-                status="ACTIVE",
-                sector="Sector 01",
-                started_at=now_iso,
-                elapsed="00:00:00",
+        if mission_doc is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Mission '{mission_id}' not found."
             )
+
+        mission_robot = mission_doc.get("robot_id")
+        if mission_robot and mission_robot != robot_id:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Mission '{mission_id}' is assigned to robot '{mission_robot}', not '{robot_id}'."
+            )
+
+        mission = transform_mission_doc(mission_doc)
 
         # 2. Latest Telemetry -> RobotState
         telemetry_doc = await db.telemetry.find_one(
@@ -58,7 +61,7 @@ async def get_dashboard_data(robot_id: str, mission_id: str):
             robot = RobotStateResponse(
                 robot_id=robot_id,
                 mission_id=mission_id,
-                location=Location(latitude=21.76, longitude=72.15, altitude=0.0),
+                location=Location(latitude=30.901, longitude=75.8573, altitude=0.0),
                 speed=0.0,
                 heading=0.0,
                 orientation=Orientation(roll=0.0, pitch=0.0, yaw=0.0),
@@ -183,4 +186,3 @@ async def get_dashboard_data(robot_id: str, mission_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

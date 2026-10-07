@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from datetime import datetime, timezone
+from typing import List, Optional
 
-from models.MissionsModel import MissionCreate, MissionResponse
+from models.MissionsModel import MissionCreate, MissionResponse, MissionSummaryResponse
 from db.mongoDB import db
 
 missions_router = APIRouter()
@@ -59,11 +60,30 @@ def transform_mission_doc(doc: dict) -> MissionResponse:
     return MissionResponse(
         mission_id=doc["mission_id"],
         name=doc.get("name", "Mission"),
+        robot_id=doc.get("robot_id", "RAKSHA-01"),
         status=status,
         sector=doc.get("sector", "Sector 01"),
         started_at=started_at_dt.isoformat(),
         elapsed=elapsed,
     )
+
+
+@missions_router.get("", response_model=List[MissionSummaryResponse])
+async def list_missions(robot_id: Optional[str] = Query(None)):
+    try:
+        query = {}
+        if robot_id:
+            query["robot_id"] = robot_id
+
+        cursor = db.missions.find(query).sort("started_at", -1)
+        missions = []
+        async for doc in cursor:
+            missions.append(transform_mission_doc(doc))
+        return missions
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @missions_router.post("/create_mission")

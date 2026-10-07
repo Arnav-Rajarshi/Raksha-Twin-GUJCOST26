@@ -1,5 +1,6 @@
 export type Severity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export type DataState = "LIVE" | "CACHED" | "STALE" | "DISCONNECTED";
+export type DashboardView = "MAP" | "CAMERA";
 
 export interface RobotState {
   robot_id: string;
@@ -60,6 +61,17 @@ export interface DetectionSummary {
 export interface Mission {
   mission_id: string;
   name: string;
+  robot_id?: string;
+  status: "ACTIVE" | "PAUSED" | "COMPLETE";
+  sector: string;
+  started_at: string;
+  elapsed: string;
+}
+
+export interface MissionSummary {
+  mission_id: string;
+  name: string;
+  robot_id: string;
   status: "ACTIVE" | "PAUSED" | "COMPLETE";
   sector: string;
   started_at: string;
@@ -103,7 +115,7 @@ export interface NearbyService {
 export interface CameraState {
   camera_id: string;
   stream_url: string | null;
-  /** Frontend-only mock still frame used until a real stream is available. */
+  /** Frontend mock still frame fallback used until hardware RTSP/WebRTC stream is active. */
   preview_frame_url?: string | null;
   stream_fps?: number;
   connection_status: "CONNECTED" | "DISCONNECTED";
