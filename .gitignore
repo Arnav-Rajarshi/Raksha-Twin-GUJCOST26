@@ -7,3 +7,4 @@ backend.zip
 .env/
 .env.*.env.local
 backend/.env.local
+node_modules/

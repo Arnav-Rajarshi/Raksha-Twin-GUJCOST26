@@ -43,8 +43,10 @@ function IndexPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const isEntryExplicit = search.entry === "true";
-  const selectedRobot = isEntryExplicit ? undefined : (search.robot || "RT001");
-  const selectedMission = isEntryExplicit ? undefined : (search.mission || "MI007");
+  // A bare visit must stop at mission entry. Dashboard loading is only
+  // triggered by an explicit mission URL or a selection from MissionEntry.
+  const selectedRobot = isEntryExplicit ? undefined : search.robot;
+  const selectedMission = isEntryExplicit ? undefined : search.mission;
 
   useEffect(() => {
     if (selectedRobot && selectedMission) {
@@ -72,21 +74,18 @@ function IndexPage() {
 
   const handleSelectMission = (robotId: string, missionId: string) => {
     navigate({
-      search: {
+      to: "/",
+      search: () => ({
         robot: robotId,
         mission: missionId,
-        entry: undefined,
-      },
+      }),
     });
   };
 
   const handleReturnToEntry = () => {
     navigate({
-      search: {
-        entry: "true",
-        robot: undefined,
-        mission: undefined,
-      },
+      to: "/",
+      search: () => ({ entry: "true" }),
     });
     setSnapshot(null);
     setLoadError(null);
@@ -150,8 +149,8 @@ function IndexPage() {
   // Default: First-Entry Mission Selector Screen
   return (
     <MissionEntry
-      initialRobotId={search.robot || "RT001"}
-      initialMissionId={search.mission || "MI007"}
+      initialRobotId={search.robot || ""}
+      initialMissionId={search.mission || ""}
       onSelectMission={handleSelectMission}
       errorMessage={loadError}
     />

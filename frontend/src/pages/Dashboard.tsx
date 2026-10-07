@@ -188,18 +188,28 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
         </header>
 
         {/* ==================== VIEW MODES ==================== */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="sync">
           {viewMode === "MAP" ? (
             /* ------------------- MAP MODE (DEFAULT) ------------------- */
-            <div key="map-layout" className="normal-layout-container">
+            <motion.div
+              key="map-layout"
+              className="normal-layout-container"
+              initial={{ opacity: 0, scale: 0.985, y: 18 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: -22 }}
+              transition={{ duration: 0.72, ease: [0.22, 0.75, 0.2, 1] }}
+              style={{ transformOrigin: "50% 45%" }}
+            >
               {/* Left Side */}
               <motion.aside className="left-stack" {...enter(-16, 0)}>
-                <LiveCamera
-                  data={data.camera}
-                  detections={data.detections}
-                  isFocused={false}
-                  onToggleFocus={toggleViewMode}
-                />
+                <motion.div layoutId="camera-feed" className="map-camera-frame">
+                  <LiveCamera
+                    data={data.camera}
+                    detections={data.detections}
+                    isFocused={false}
+                    onToggleFocus={toggleViewMode}
+                  />
+                </motion.div>
                 <DetectionPanel data={data.detections} layoutMode="horizontal" />
               </motion.aside>
 
@@ -214,18 +224,30 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
                 <MissionTimeline events={data.events} />
                 <AlertStrip alerts={data.alerts} />
               </motion.div>
-            </div>
+            </motion.div>
           ) : (
             /* ------------------- CAMERA FOCUS MODE ------------------- */
-            <div key="camera-focus-layout" className="camera-focus-container">
+            <motion.div
+              key="camera-focus-layout"
+              className="camera-focus-container"
+              initial={{ opacity: 0, scale: 0.96, y: 34 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.985, y: -28 }}
+              transition={{ duration: 0.78, ease: [0.22, 0.75, 0.2, 1] }}
+              style={{ transformOrigin: "50% 0%" }}
+            >
               {/* Left Stack: Vertical AI Perception + Attached Alerts */}
               <motion.aside className="camera-focus-left" {...enter(-16, 0)}>
-                <DetectionPanel data={data.detections} layoutMode="vertical" />
+                <DetectionPanel data={data.detections} focusPrediction />
                 <AlertStrip alerts={data.alerts} className="attached-alerts-panel" />
               </motion.aside>
 
               {/* Central Large Camera Frame */}
-              <motion.section className="camera-hero-section" {...enter(0, -10, 0.05)}>
+              <motion.section
+                className="camera-hero-section"
+                layoutId="camera-feed"
+                {...enter(0, -10, 0.05)}
+              >
                 <LiveCamera
                   data={data.camera}
                   detections={data.detections}
@@ -249,7 +271,7 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
                 </div>
                 <MissionTimeline events={data.events} />
               </motion.div>
-            </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

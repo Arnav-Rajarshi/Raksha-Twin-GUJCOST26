@@ -7,12 +7,14 @@ interface DetectionPanelProps {
   data: DetectionSummary;
   layoutMode?: "horizontal" | "vertical";
   className?: string;
+  focusPrediction?: boolean;
 }
 
 export function DetectionPanel({
   data,
   layoutMode = "horizontal",
   className = "",
+  focusPrediction = false,
 }: DetectionPanelProps) {
   const items = [
     { label: "PERSONS", value: data.person_count, icon: PersonStanding, tone: "critical" },
@@ -21,6 +23,19 @@ export function DetectionPanel({
   ];
   const conf = Math.round((data.latest_detection?.confidence || 0) * 100);
   const isVertical = layoutMode === "vertical";
+
+  if (focusPrediction) {
+    return (
+      <Panel title="Priority prediction" code="AI · TOP" className={`detection-panel prediction-focus ${className}`}>
+        <div className="prediction-focus-body">
+          <strong>{data.latest_detection?.type || "NO CURRENT PREDICTION"}</strong>
+          <span>CONF {conf}%</span>
+          <div className="conf-bar"><i style={{ width: `${conf}%` }} /></div>
+          <time>{formatTime(data.latest_detection?.timestamp || data.updated_at)}</time>
+        </div>
+      </Panel>
+    );
+  }
 
   return (
     <Panel

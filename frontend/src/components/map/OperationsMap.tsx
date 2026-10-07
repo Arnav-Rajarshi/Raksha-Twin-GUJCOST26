@@ -99,10 +99,15 @@ export function OperationsMap({
     const token = import.meta.env["VITE_MAPBOX_ACCESS_TOKEN"] as string | undefined;
     let cancelled = false;
 
-    const center: [number, number] = [
-      robot.location?.longitude ?? data.path?.path?.coordinates?.slice(-1)[0]?.[0] ?? 72.0782,
-      robot.location?.latitude ?? data.path?.path?.coordinates?.slice(-1)[0]?.[1] ?? 21.7847,
-    ];
+    const endpoint = data.path?.path?.coordinates?.slice(-1)[0];
+    const robotLng = robot.location?.longitude;
+    const robotLat = robot.location?.latitude;
+    const hasRobotPosition = Number.isFinite(robotLng) && Number.isFinite(robotLat);
+    const center: [number, number] = hasRobotPosition
+      ? [robotLng, robotLat]
+      : endpoint && Number.isFinite(endpoint[0]) && Number.isFinite(endpoint[1])
+        ? endpoint
+        : [72.0782, 21.7847];
 
     const load = async () => {
       let map: AnyMap;
@@ -294,6 +299,9 @@ export function OperationsMap({
         // Robot Live Marker at latest robot location
         const marker = document.createElement("div");
         marker.className = "robot-map-marker";
+        // MapLibre adjusts marker stacking while pitching/rotating. Keep the
+        // live robot marker above service/operator markers in every view.
+        marker.style.zIndex = "1000";
         marker.innerHTML = `<span class="ping"></span><img alt="${robot.robot_id}" src="${markerAsset}" />`;
         marker.addEventListener("click", (e) => {
           e.stopPropagation();

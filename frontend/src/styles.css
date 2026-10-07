@@ -592,13 +592,25 @@ button {
   inset: 0;
   background: var(--map-base);
   filter: brightness(var(--map-brightness, 0.7));
-  transition: filter 0.5s ease, opacity 0.5s ease;
+  transition: inset 0.78s cubic-bezier(0.22, 0.75, 0.2, 1), width 0.78s cubic-bezier(0.22, 0.75, 0.2, 1), height 0.78s cubic-bezier(0.22, 0.75, 0.2, 1), filter 0.55s ease, opacity 0.55s ease;
   pointer-events: auto;
 }
 
 .map-stage.is-receded-map {
   filter: brightness(0.55);
   opacity: 0.8;
+  cursor: pointer;
+}
+
+.dashboard-shell.mode-camera-focus .map-stage.is-receded-map {
+  inset: 64px auto auto 8px;
+  width: clamp(260px, 18vw, 290px);
+  height: 32vh;
+  border: 1px solid var(--healthy);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--healthy) 45%, transparent), 0 10px 28px #0008;
+  filter: none;
+  opacity: 1;
+  z-index: 3;
   cursor: pointer;
 }
 
@@ -712,17 +724,25 @@ button {
 
 .camera-focus-container {
   display: grid;
-  grid-template-columns: clamp(260px, 18vw, 290px) 1fr clamp(250px, 18vw, 280px);
+  grid-template-columns: clamp(260px, 18vw, 290px) minmax(0, 1fr) clamp(250px, 18vw, 280px);
+  grid-template-rows: minmax(430px, 1fr) minmax(55vh, 70vh);
+  grid-template-areas:
+    "left camera right"
+    "logs logs right";
   gap: 8px;
   min-height: calc(100vh - 64px);
   pointer-events: none;
 }
 
 .camera-focus-left {
+  grid-area: left;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding-top: calc(32vh + 12px);
   min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
   pointer-events: none;
 }
 
@@ -731,6 +751,7 @@ button {
 }
 
 .camera-hero-section {
+  grid-area: camera;
   display: flex;
   flex-direction: column;
   min-height: 520px;
@@ -747,6 +768,7 @@ button {
 }
 
 .camera-focus-right {
+  grid-area: right;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -760,17 +782,25 @@ button {
 }
 
 .camera-focus-bottom {
-  grid-column: 1 / -1;
+  grid-area: logs;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 8px;
-  padding-bottom: 24px;
+  margin-top: 0;
+  padding-bottom: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
   pointer-events: none;
 }
 
 .camera-focus-bottom > * {
   pointer-events: auto;
+}
+
+.camera-focus-bottom > .mission-panel {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .bottom-fold-header {
@@ -779,6 +809,38 @@ button {
   color: var(--primary);
   padding: 4px 6px;
 }
+
+.map-camera-frame {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  pointer-events: auto;
+}
+
+.map-camera-frame > .camera-panel {
+  width: 100%;
+  min-height: 0;
+}
+
+.prediction-focus { flex: 0 0 auto; }
+.prediction-focus-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 5px 10px;
+  padding: 8px 10px;
+}
+.prediction-focus-body strong {
+  color: var(--warning);
+  font: 600 15px var(--font-display);
+  overflow-wrap: anywhere;
+}
+.prediction-focus-body span,
+.prediction-focus-body time {
+  color: var(--muted-foreground);
+  font: 500 8px var(--font-mono);
+}
+.prediction-focus-body .conf-bar { grid-column: 1 / -1; }
 
 /* Vertical AI Perception in Camera Focus */
 .is-vertical-layout .counts-vertical {
@@ -1827,6 +1889,10 @@ small, .mono, time, code, dt {
   z-index: 10 !important;
   pointer-events: auto;
 }
+.maplibregl-marker.robot-map-marker,
+.mapboxgl-marker.robot-map-marker {
+  z-index: 1000 !important;
+}
 .robot-map-marker img {
   position: relative;
   width: 44px;
@@ -1957,6 +2023,13 @@ small, .mono, time, code, dt {
     position: relative;
     height: 50vh;
   }
+  .dashboard-shell.mode-camera-focus .map-stage.is-receded-map {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 42vh;
+    margin-bottom: 8px;
+  }
   .console-grid {
     position: relative;
     display: flex;
@@ -1969,6 +2042,9 @@ small, .mono, time, code, dt {
   .camera-focus-container {
     display: flex;
     flex-direction: column;
+  }
+  .camera-focus-left {
+    padding-top: 0;
   }
   .camera-panel {
     min-height: 300px;
