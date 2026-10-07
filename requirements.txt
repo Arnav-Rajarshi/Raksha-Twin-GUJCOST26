@@ -1,0 +1,14 @@
+fastapi[standard]
+uvicorn
+httpx
+python-dotenv
+openmeteo-requests
+numpy
+pandas
+requests-cache
+retry-requests
+HTTPException
+
+#pip install openmeteo-requests
+#pip install requests-cache retry-requests numpy pandas
+# pip install fastapi[standard] uvicorn python-dotenv httpx Collecting fastapi[standard]
