@@ -5,7 +5,7 @@ import { formatTime } from "@/utils/formatters";
 const hazardTone = (s: EnvironmentState["hazard_status"]) => (s === "CRITICAL" ? "critical" : s === "WARNING" ? "warning" : "healthy");
 const compass = (deg: number) => ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(deg / 45) % 8];
 
-export async function EnvironmentPanel({ onboard, weather }: { onboard: EnvironmentState; weather: WeatherState }) {
+export function EnvironmentPanel({ onboard, weather }: { onboard: EnvironmentState; weather: WeatherState }) {
 
   const w = weather;
 
@@ -27,7 +27,7 @@ export async function EnvironmentPanel({ onboard, weather }: { onboard: Environm
         <Cell label="RAIN 24H" value={w.current.rainfall_24h_mm.toFixed(1)} unit="mm" />
         <Cell label="FETCHED" value={formatTime(weather.fetched_at).slice(0, 5)} unit="UTC" />
       </div>
-      <div className={`weather-foot ${weather.warnings.length ? "warning-text" : ""}`}>{weather.warnings.length ? `▲ ${weather.warnings.join(" · ")}` : "● NO ACTIVE IMD WARNING"}</div>
+      <div className={`weather-foot ${weather.warnings.length ? "warning-text" : ""}`}>{weather.warnings.length ? `▲ ${weather.warnings.join(" · ")}` : "● NO ACTIVE WEATHER WARNING"}</div>
     </Panel>
   );
 }

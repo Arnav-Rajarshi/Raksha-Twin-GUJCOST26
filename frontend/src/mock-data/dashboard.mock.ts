@@ -48,7 +48,7 @@ export const dashboardMock: DashboardSnapshot = {
   },
   weather: {
     location: { latitude: 30.901, longitude: 75.8573 },
-    source: "IMD",
+    source: "Open-Meteo",
     fetched_at: "2026-10-01T18:50:00.000Z",
     observed_at: "2026-10-01T18:30:00.000Z",
     current: {

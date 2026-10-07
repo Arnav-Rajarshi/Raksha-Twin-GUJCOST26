@@ -34,7 +34,7 @@ export interface EnvironmentState {
 
 export interface WeatherState {
   location: { latitude: number; longitude: number };
-  source: "IMD";
+  source: "Open-Meteo";
   fetched_at: string;
   observed_at: string;
   current: {

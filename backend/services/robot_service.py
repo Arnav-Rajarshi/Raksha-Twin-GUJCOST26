@@ -1,5 +1,5 @@
 def get_robot_location():
     return {
-        "latitude": 21.76,
-        "longitude": 72.15
+        "latitude": 30.901,
+        "longitude": 75.8573,
     }

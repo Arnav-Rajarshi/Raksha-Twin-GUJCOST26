@@ -1,2 +1,6 @@
-import { dashboardMock } from "@/mock-data/dashboard.mock";
-export const getNearbyServices = () => structuredClone(dashboardMock.nearbyServices).sort((a, b) => a.distance_km - b.distance_km);
+import type { NearbyService } from "@/models/dashboard";
+import { apiFetch } from "./apiClient";
+
+export async function getNearbyServices(): Promise<NearbyService[]> {
+  return apiFetch<NearbyService[]>("/nearby-services");
+}

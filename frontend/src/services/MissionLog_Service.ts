@@ -1,2 +1,6 @@
-import { dashboardMock } from "@/mock-data/dashboard.mock";
-export const getMissionEvents = () => structuredClone(dashboardMock.events).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+import type { MissionEvent } from "@/models/dashboard";
+import { apiFetch } from "./apiClient";
+
+export async function getMissionEvents(missionId: string = "MISSION-001"): Promise<MissionEvent[]> {
+  return apiFetch<MissionEvent[]>(`/events/${missionId}`);
+}

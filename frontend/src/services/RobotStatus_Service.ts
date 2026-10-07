@@ -1,27 +1,40 @@
-import { dashboardMock } from "@/mock-data/dashboard.mock";
 import type { RobotState } from "@/models/dashboard";
+import { apiFetch } from "./apiClient";
 
-export const getRobotStatus = (): RobotState => structuredClone(dashboardMock.robot);
+export async function fetchLatestTelemetry(
+  robotId: string = "RAKSHA-01",
+  missionId: string = "MISSION-001"
+): Promise<RobotState> {
+  return apiFetch<RobotState>(`/telemetry/latest/${robotId}/${missionId}`);
+}
 
 /**
- * Mock telemetry stream. Later replace with the WebSocket feed (VITE_WS_BASE_URL).
- * Emits small variations around the mock robot state so the UI can animate.
+ * Polls backend for live robot telemetry at specified interval.
+ * Returns an unsubscribe function to clean up the interval.
  */
-export function subscribeRobotTelemetry(onUpdate: (state: RobotState) => void): () => void {
-  const base = getRobotStatus();
-  let tick = 0;
-  const id = setInterval(() => {
-    tick += 1;
-    const wobble = Math.sin(tick / 3);
-    const heading = (base.heading + wobble * 14 + 360) % 360;
-    onUpdate({
-      ...base,
-      heading: Math.round(heading),
-      speed: +(base.speed + wobble * 0.6).toFixed(1),
-      location: { ...base.location, altitude: +(base.location.altitude + Math.cos(tick / 4) * 1.4).toFixed(1) },
-      orientation: { ...base.orientation, yaw: +heading.toFixed(1) },
-      last_update: new Date(Date.parse(base.last_update) + tick * 2000).toISOString(),
-    });
-  }, 2000);
-  return () => clearInterval(id);
+export function subscribeRobotTelemetry(
+  onUpdate: (state: RobotState) => void,
+  intervalMs: number = 2000,
+  robotId: string = "RAKSHA-01",
+  missionId: string = "MISSION-001"
+): () => void {
+  let isSubscribed = true;
+
+  const poll = async () => {
+    try {
+      const live = await fetchLatestTelemetry(robotId, missionId);
+      if (isSubscribed) {
+        onUpdate(live);
+      }
+    } catch (err) {
+      console.warn("Telemetry polling update failed:", err);
+    }
+  };
+
+  const id = setInterval(poll, intervalMs);
+
+  return () => {
+    isSubscribed = false;
+    clearInterval(id);
+  };
 }

@@ -6,10 +6,19 @@ export function useRobotTelemetry(initial: RobotState) {
   const [state, setState] = useState<RobotState>(initial);
 
   useEffect(() => {
-    const unsubscribe = subscribeRobotTelemetry(setState);
+    setState(initial);
+  }, [initial]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeRobotTelemetry(
+      setState,
+      2000,
+      initial.robot_id,
+      initial.mission_id
+    );
 
     return unsubscribe;
-  }, []);
+  }, [initial.robot_id, initial.mission_id]);
 
   return state;
 }
