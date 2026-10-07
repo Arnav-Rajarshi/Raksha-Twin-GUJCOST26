@@ -39,55 +39,57 @@ export function AlertStrip({ alerts, className = "", onAlertResolved }: AlertStr
       code={`ALR · ${active.length}`}
       className={`alert-panel ${className}`}
     >
-      {alerts.length === 0 ? (
-        <div className="alert-empty">
-          <CheckCircle2 size={14} />
-          <span>NO ACTIVE ALERTS</span>
-        </div>
-      ) : (
-        alerts.map((alert) => {
-          const isAck = acked[alert.alert_id];
-          const isPending = resolving[alert.alert_id];
-          const isResolved = alert.status === "RESOLVED" || isAck;
+      <div className="alert-list">
+        {alerts.length === 0 ? (
+          <div className="alert-empty">
+            <CheckCircle2 size={14} />
+            <span>NO ACTIVE ALERTS</span>
+          </div>
+        ) : (
+          alerts.map((alert) => {
+            const isAck = acked[alert.alert_id];
+            const isPending = resolving[alert.alert_id];
+            const isResolved = alert.status === "RESOLVED" || isAck;
 
-          return (
-            <motion.div
-              key={alert.alert_id}
-              className={`alert-item ${severityTone(alert.severity)} ${isResolved ? "acked" : ""}`}
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="alert-row">
-                <AlertTriangle size={14} />
-                <strong>{alert.severity}</strong>
-                <span className="alert-type">{alert.type.replaceAll("_", " ")}</span>
-                <time>{formatTime(alert.timestamp)}</time>
-              </div>
+            return (
+              <motion.div
+                key={alert.alert_id}
+                className={`alert-item ${severityTone(alert.severity)} ${isResolved ? "acked" : ""}`}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="alert-row">
+                  <AlertTriangle size={14} />
+                  <strong>{alert.severity}</strong>
+                  <span className="alert-type">{alert.type.replaceAll("_", " ")}</span>
+                  <time>{formatTime(alert.timestamp)}</time>
+                </div>
 
-              <p className="alert-msg">{alert.message}</p>
+                <p className="alert-msg">{alert.message}</p>
 
-              <div className="alert-row alert-actions">
-                <small>
-                  {isResolved
-                    ? "ACKNOWLEDGED · OPS 01"
-                    : alert.status === "RESOLVED"
-                    ? "RESOLVED"
-                    : "AWAITING OPERATOR"}
-                </small>
-                {!isResolved && alert.status === "ACTIVE" && (
-                  <button
-                    type="button"
-                    onClick={() => handleAcknowledge(alert.alert_id)}
-                    disabled={isPending}
-                  >
-                    {isPending ? "RESOLVING…" : "ACKNOWLEDGE"}
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          );
-        })
-      )}
+                <div className="alert-row alert-actions">
+                  <small>
+                    {isResolved
+                      ? "ACKNOWLEDGED · OPS 01"
+                      : alert.status === "RESOLVED"
+                      ? "RESOLVED"
+                      : "AWAITING OPERATOR"}
+                  </small>
+                  {!isResolved && alert.status === "ACTIVE" && (
+                    <button
+                      type="button"
+                      onClick={() => handleAcknowledge(alert.alert_id)}
+                      disabled={isPending}
+                    >
+                      {isPending ? "RESOLVING…" : "ACKNOWLEDGE"}
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })
+        )}
+      </div>
     </Panel>
   );
 }

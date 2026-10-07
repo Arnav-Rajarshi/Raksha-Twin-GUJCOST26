@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Bell,
   ChevronDown,
@@ -48,6 +48,12 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
   const toggleViewMode = useCallback(() => {
     setViewMode((prev) => (prev === "MAP" ? "CAMERA" : "MAP"));
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("camera-mode-page", viewMode === "CAMERA");
+    if (viewMode === "MAP") window.scrollTo({ top: 0, behavior: "smooth" });
+    return () => document.body.classList.remove("camera-mode-page");
+  }, [viewMode]);
 
   const TodIcon =
     tod.phase === "DAY"
@@ -262,19 +268,40 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
                 <EnvironmentPanel onboard={data.environment} weather={data.weather} />
               </motion.aside>
 
-              {/* Bottom Activity Section (Scrollable under fold) */}
-              <motion.div className="camera-focus-bottom" {...enter(0, 16, 0.12)}>
-                <div className="bottom-fold-header">
-                  <span>
-                    MISSION EVENT LOG // ALL ENTRIES ({data.events.length})
-                  </span>
-                </div>
-                <MissionTimeline events={data.events} />
-              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {viewMode === "CAMERA" && (
+          <motion.div
+            className="camera-activity-preview"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.45, delay: 0.15 }}
+          >
+            <MissionTimeline events={data.events} compact />
+          </motion.div>
+        )}
       </div>
+
+      <AnimatePresence>
+        {viewMode === "CAMERA" && (
+          <motion.section
+            key="camera-log-page"
+            className="camera-log-page-section"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.55, ease: [0.22, 0.75, 0.2, 1] }}
+          >
+            <div className="camera-log-section-heading">
+              MISSION EVENT LOG // ALL ENTRIES ({data.events.length})
+            </div>
+            <MissionTimeline events={data.events} className="camera-full-timeline" />
+          </motion.section>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

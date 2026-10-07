@@ -14,7 +14,7 @@ export function MissionTimeline({
   className = "",
   compact = false,
 }: MissionTimelineProps) {
-  const displayEvents = compact ? events.slice(0, 1) : events;
+  const displayEvents = compact ? events.slice(0, 3) : events;
 
   return (
     <Panel
