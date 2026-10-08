@@ -88,9 +88,16 @@ export function OperationsMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<AnyMap | null>(null);
   const robotMarkerRef = useRef<AnyMarker | null>(null);
+  const recededRef = useRef(receded);
+  const onMapClickRef = useRef(onMapClick);
   const [engine, setEngine] = useState<"mapbox" | "maplibre" | null>(null);
   const [zoom, setZoom] = useState(15.5);
   const [selected, setSelected] = useState(false);
+
+  useEffect(() => {
+    recededRef.current = receded;
+    onMapClickRef.current = onMapClick;
+  }, [receded, onMapClick]);
 
   // Initialize Map
   useEffect(() => {
@@ -191,8 +198,8 @@ export function OperationsMap({
       map.on("move", () => setZoom(map.getZoom()));
 
       map.on("click", () => {
-        if (receded && onMapClick) {
-          onMapClick();
+        if (recededRef.current) {
+          onMapClickRef.current?.();
         }
       });
 
@@ -399,7 +406,6 @@ export function OperationsMap({
   return (
     <div
       className={`map-stage ${receded ? "is-receded-map" : ""}`}
-      onClick={receded ? onMapClick : undefined}
     >
       <div ref={containerRef} className="map-canvas" />
       {!engine && <div className="map-loading">ACQUIRING SATELLITE IMAGERY…</div>}

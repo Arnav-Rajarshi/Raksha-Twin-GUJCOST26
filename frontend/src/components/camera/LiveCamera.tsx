@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { Crosshair, Maximize2, Minimize2 } from "lucide-react";
-import type { CameraState, DetectionSummary } from "@/models/dashboard";
+import type { CameraState, DetectionSummary, PiDetectionState } from "@/models/dashboard";
 import { formatTime } from "@/utils/formatters";
+import { LOCAL_ML_VIDEO_URL, RAKSHA_ML_VIDEO_URL } from "@/services/CameraFeed_Service";
+
+export type LiveCameraSource = "PI" | "LOCAL";
 
 interface LiveCameraProps {
   data: CameraState;
   detections: DetectionSummary;
+  isLiveCamera: boolean;
+  cameraSource: LiveCameraSource;
+  liveStreamFailed: boolean;
+  piDetections: PiDetectionState | null;
+  onLiveCameraChange: (isLive: boolean) => void;
+  onLiveStreamError: (source: LiveCameraSource) => void;
   isFocused?: boolean;
   onToggleFocus?: () => void;
 }
@@ -13,6 +22,12 @@ interface LiveCameraProps {
 export function LiveCamera({
   data,
   detections,
+  isLiveCamera,
+  cameraSource,
+  liveStreamFailed,
+  piDetections,
+  onLiveCameraChange,
+  onLiveStreamError,
   isFocused = false,
   onToggleFocus,
 }: LiveCameraProps) {
@@ -27,8 +42,15 @@ export function LiveCamera({
     return () => clearInterval(id);
   }, [data.latest_detection.timestamp]);
 
-  const live = data.connection_status === "CONNECTED";
-  const confidence = Math.round((data.latest_detection.confidence || 0) * 100);
+  const live = isLiveCamera ? !liveStreamFailed : data.connection_status === "CONNECTED";
+  const latestPiDetection = piDetections?.detections?.[0];
+  const targetType = isLiveCamera
+    ? latestPiDetection?.class_name?.toUpperCase() || "PERSON"
+    : data.latest_detection.type;
+  const targetConfidence = isLiveCamera
+    ? latestPiDetection?.confidence || 0
+    : data.latest_detection.confidence;
+  const confidence = Math.round((targetConfidence || 0) * 100);
 
   return (
     <section
@@ -41,6 +63,16 @@ export function LiveCamera({
         </span>
         <div className="camera-header-controls">
           <code>{isFocused ? "FOCUS.VR" : "CAM.01"}</code>
+          <button
+            type="button"
+            className="camera-live-toggle-btn"
+            onClick={(event) => {
+              event.stopPropagation();
+              onLiveCameraChange(!isLiveCamera);
+            }}
+          >
+            {isLiveCamera ? "SWITCH TO MOCK" : "SWITCH TO LIVE"}
+          </button>
           {onToggleFocus && (
             <button
               type="button"
@@ -56,7 +88,14 @@ export function LiveCamera({
       </header>
 
       <div className="camera-feed" onClick={!isFocused ? onToggleFocus : undefined}>
-        {data.stream_url ? (
+        {isLiveCamera && !liveStreamFailed ? (
+          <img
+            className="camera-live-stream"
+            src={cameraSource === "PI" ? RAKSHA_ML_VIDEO_URL : LOCAL_ML_VIDEO_URL}
+            alt={cameraSource === "PI" ? "Raspberry Pi live AI camera stream" : "Local laptop AI camera stream"}
+            onError={() => onLiveStreamError(cameraSource)}
+          />
+        ) : data.stream_url ? (
           <video src={data.stream_url} autoPlay muted loop playsInline />
         ) : data.preview_frame_url ? (
           <img
@@ -68,6 +107,12 @@ export function LiveCamera({
           />
         ) : (
           <div className="camera-nosignal">NO SIGNAL // FEED OFFLINE</div>
+        )}
+
+        {isLiveCamera && liveStreamFailed && (
+          <div className="camera-live-error">
+            {cameraSource === "LOCAL" ? "LOCAL CAMERA OFFLINE · MOCK VIEW SHOWN" : "PI STREAM OFFLINE · MOCK VIEW SHOWN"}
+          </div>
         )}
 
         <div className="camera-noise" aria-hidden="true" />
@@ -85,7 +130,7 @@ export function LiveCamera({
         <div className="camera-top">
           <span className={`live-chip ${live ? "" : "off"}`}>
             <i />
-            {live ? "LIVE" : "OFFLINE"}
+            {live ? (cameraSource === "LOCAL" ? "LOCAL AI" : "LIVE") : isLiveCamera ? "OFFLINE" : "OFFLINE"}
           </span>
           <span>{data.camera_id} / RGB</span>
           <span>
@@ -95,19 +140,26 @@ export function LiveCamera({
           <span className="cam-clock">{formatTime(clock)} UTC</span>
         </div>
 
-        <div className="target-box">
-          <span>
-            {data.latest_detection.type} {confidence}%
-          </span>
-          <Crosshair size={12} />
-        </div>
+        {!isLiveCamera && (
+          <div className="target-box">
+            <span>
+              {targetType} {confidence}%
+            </span>
+            <Crosshair size={12} />
+          </div>
+        )}
 
         <div className="camera-bottom">
-          <span>AI · YOLO ACTIVE</span>
-          <span>
+          <span>{isLiveCamera ? `AI · YOLO ${cameraSource}` : "AI · YOLO ACTIVE"}</span>
+          {isLiveCamera ? (
+            <span>
+              PERSONS {piDetections?.person_count ?? "—"} · AI FPS {piDetections?.fps?.toFixed(1) ?? "—"}
+              {latestPiDetection?.status ? ` · ${latestPiDetection.status}` : ""}
+            </span>
+          ) : <span>
             P {detections.person_count} · D {detections.debris_count} · O {detections.obstacle_count}
-          </span>
-          <span>{data.connection_status}</span>
+          </span>}
+          <span>{isLiveCamera ? (liveStreamFailed ? "CAMERA OFFLINE" : `${cameraSource} LIVE`) : data.connection_status}</span>
           {onToggleFocus && (
             <button
               type="button"

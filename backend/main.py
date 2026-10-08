@@ -64,7 +64,7 @@ async def health_check():
 app.include_router(router=map_router, prefix="/api/openmeteo")
 app.include_router(router=missions_router, prefix="/missions")
 app.include_router(router=telemetry_router, prefix="/telemetry")
-app.include_router(router=sensor_router, prefix="/sensor")
+app.include_router(router=sensor_router, prefix="/sensors")
 app.include_router(router=detection_router, prefix="/detections")
 app.include_router(router=event_router, prefix="/events")
 app.include_router(router=alert_router, prefix="/alerts")

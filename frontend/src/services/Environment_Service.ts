@@ -5,5 +5,5 @@ export async function getEnvironment(
   robotId: string = "RAKSHA-01",
   missionId: string = "MISSION-001"
 ): Promise<EnvironmentState> {
-  return apiFetch<EnvironmentState>(`/sensor/latest/${robotId}/${missionId}`);
+  return apiFetch<EnvironmentState>(`/sensors/latest/${robotId}/${missionId}`);
 }

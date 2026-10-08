@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Bell,
   ChevronDown,
@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-import type { DashboardSnapshot, DashboardView } from "@/models/dashboard";
+import type { DashboardSnapshot, DashboardView, EnvironmentState, PiDetectionState } from "@/models/dashboard";
 import { OperationsMap } from "@/components/map/OperationsMap";
-import { LiveCamera } from "@/components/camera/LiveCamera";
+import { LiveCamera, type LiveCameraSource } from "@/components/camera/LiveCamera";
 import { RobotStatus } from "@/components/robot-status/RobotStatus";
 import { EnvironmentPanel } from "@/components/environment/EnvironmentPanel";
 import { DetectionPanel } from "@/components/detections/DetectionPanel";
@@ -26,6 +26,8 @@ import { AlertStrip } from "@/components/alerts/AlertStrip";
 
 import { useRobotTelemetry } from "@/hooks/useRobotTelemetry";
 import { useTimeOfDay } from "@/hooks/useTimeOfDay";
+import { getEnvironment } from "@/services/Environment_Service";
+import { getLocalDetections, getPiDetections } from "@/services/CameraFeed_Service";
 import { formatTime } from "@/utils/formatters";
 import botAsset from "@/assets/raksha twin bot svg.png";
 
@@ -42,12 +44,106 @@ interface DashboardProps {
 
 export function Dashboard({ data, onSwitchMission }: DashboardProps) {
   const [viewMode, setViewMode] = useState<DashboardView>("MAP");
+  const [onboardEnvironment, setOnboardEnvironment] = useState<EnvironmentState>(data.environment);
+  const [isLiveCamera, setIsLiveCamera] = useState(false);
+  const [cameraSource, setCameraSource] = useState<LiveCameraSource>("PI");
+  const [liveStreamFailed, setLiveStreamFailed] = useState(false);
+  const [piDetections, setPiDetections] = useState<PiDetectionState | null>(null);
   const robot = useRobotTelemetry(data.robot);
   const tod = useTimeOfDay();
+
+  useEffect(() => {
+    setOnboardEnvironment(data.environment);
+  }, [data.environment]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let requestPending = false;
+
+    const pollEnvironment = async () => {
+      if (requestPending) return;
+      requestPending = true;
+
+      try {
+        const latest = await getEnvironment(data.robot.robot_id, data.mission.mission_id);
+        if (isMounted) setOnboardEnvironment(latest);
+      } catch (error) {
+        console.warn("Environment polling update failed:", error);
+      } finally {
+        requestPending = false;
+      }
+    };
+
+    const intervalId = window.setInterval(() => void pollEnvironment(), 1500);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, [data.robot.robot_id, data.mission.mission_id]);
+
+  useEffect(() => {
+    if (!isLiveCamera || liveStreamFailed) return;
+
+    let requestPending = false;
+    let hasLoggedFailure = false;
+    const controller = new AbortController();
+    const pollDetections = async () => {
+      if (requestPending) return;
+      requestPending = true;
+      try {
+        const latest = cameraSource === "PI"
+          ? await getPiDetections(controller.signal)
+          : await getLocalDetections(controller.signal);
+        setPiDetections(latest);
+      } catch (error) {
+        if (!controller.signal.aborted && !hasLoggedFailure) {
+          hasLoggedFailure = true;
+          console.warn("Pi detection polling failed:", error);
+        }
+      } finally {
+        requestPending = false;
+      }
+    };
+
+    void pollDetections();
+    const intervalId = window.setInterval(() => void pollDetections(), 750);
+    return () => {
+      window.clearInterval(intervalId);
+      controller.abort();
+    };
+  }, [isLiveCamera, cameraSource, liveStreamFailed]);
+
+  const handleLiveCameraChange = useCallback((enabled: boolean) => {
+    setIsLiveCamera(enabled);
+    if (enabled) {
+      setCameraSource("PI");
+      setLiveStreamFailed(false);
+    } else {
+      setCameraSource("PI");
+      setLiveStreamFailed(false);
+      setPiDetections(null);
+    }
+  }, []);
+
+  const handleLiveStreamError = useCallback((source: LiveCameraSource) => {
+    if (source === "PI") {
+      setPiDetections(null);
+      setCameraSource("LOCAL");
+    } else {
+      setLiveStreamFailed(true);
+    }
+  }, []);
 
   const toggleViewMode = useCallback(() => {
     setViewMode((prev) => (prev === "MAP" ? "CAMERA" : "MAP"));
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("camera-mode-page", viewMode === "CAMERA");
+    if (viewMode === "MAP") window.scrollTo({ top: 0, behavior: "smooth" });
+    return () => document.body.classList.remove("camera-mode-page");
+  }, [viewMode]);
 
   const TodIcon =
     tod.phase === "DAY"
@@ -206,6 +302,12 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
                   <LiveCamera
                     data={data.camera}
                     detections={data.detections}
+                    isLiveCamera={isLiveCamera}
+                    cameraSource={cameraSource}
+                    liveStreamFailed={liveStreamFailed}
+                    piDetections={piDetections}
+                    onLiveCameraChange={handleLiveCameraChange}
+                    onLiveStreamError={handleLiveStreamError}
                     isFocused={false}
                     onToggleFocus={toggleViewMode}
                   />
@@ -216,7 +318,7 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
               {/* Right Side */}
               <motion.aside className="right-stack" {...enter(16, 0, 0.08)}>
                 <RobotStatus data={robot} />
-                <EnvironmentPanel onboard={data.environment} weather={data.weather} />
+                <EnvironmentPanel onboard={onboardEnvironment} weather={data.weather} />
               </motion.aside>
 
               {/* Bottom Stack */}
@@ -251,6 +353,12 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
                 <LiveCamera
                   data={data.camera}
                   detections={data.detections}
+                  isLiveCamera={isLiveCamera}
+                  cameraSource={cameraSource}
+                  liveStreamFailed={liveStreamFailed}
+                  piDetections={piDetections}
+                  onLiveCameraChange={handleLiveCameraChange}
+                  onLiveStreamError={handleLiveStreamError}
                   isFocused={true}
                   onToggleFocus={toggleViewMode}
                 />
@@ -259,22 +367,43 @@ export function Dashboard({ data, onSwitchMission }: DashboardProps) {
               {/* Right Stack: Status & Environment */}
               <motion.aside className="camera-focus-right" {...enter(16, 0, 0.08)}>
                 <RobotStatus data={robot} />
-                <EnvironmentPanel onboard={data.environment} weather={data.weather} />
+                <EnvironmentPanel onboard={onboardEnvironment} weather={data.weather} />
               </motion.aside>
 
-              {/* Bottom Activity Section (Scrollable under fold) */}
-              <motion.div className="camera-focus-bottom" {...enter(0, 16, 0.12)}>
-                <div className="bottom-fold-header">
-                  <span>
-                    MISSION EVENT LOG // ALL ENTRIES ({data.events.length})
-                  </span>
-                </div>
-                <MissionTimeline events={data.events} />
-              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {viewMode === "CAMERA" && (
+          <motion.div
+            className="camera-activity-preview"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.45, delay: 0.15 }}
+          >
+            <MissionTimeline events={data.events} compact />
+          </motion.div>
+        )}
       </div>
+
+      <AnimatePresence>
+        {viewMode === "CAMERA" && (
+          <motion.section
+            key="camera-log-page"
+            className="camera-log-page-section"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.55, ease: [0.22, 0.75, 0.2, 1] }}
+          >
+            <div className="camera-log-section-heading">
+              MISSION EVENT LOG // ALL ENTRIES ({data.events.length})
+            </div>
+            <MissionTimeline events={data.events} className="camera-full-timeline" />
+          </motion.section>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
