@@ -8,3 +8,4 @@ backend.zip
 .env.*.env.local
 backend/.env.local
 node_modules/
+datasets

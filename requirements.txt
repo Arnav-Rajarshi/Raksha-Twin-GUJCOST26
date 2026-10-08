@@ -7,7 +7,12 @@ numpy
 pandas
 requests-cache
 retry-requests
-HTTPException
+Ultralytics
+pymongo
+opencv
+starlette
+requests
+
 
 #pip install openmeteo-requests
 #pip install requests-cache retry-requests numpy pandas
