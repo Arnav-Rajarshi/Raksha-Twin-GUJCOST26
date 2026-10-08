@@ -137,3 +137,18 @@ export interface DashboardSnapshot {
   operatorLocation: { latitude: number; longitude: number };
   snapshotState: DataState;
 }
+
+export interface PiDetection {
+  class_name: string;
+  confidence: number;
+  status?: string;
+  posture_ratio?: number;
+  bbox?: { x1: number; y1: number; x2: number; y2: number };
+}
+
+export interface PiDetectionState {
+  status: string;
+  person_count: number;
+  fps: number;
+  detections: PiDetection[];
+}

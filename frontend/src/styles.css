@@ -1261,7 +1261,7 @@ small, .mono, time, code, dt {
   cursor: pointer;
 }
 
-.camera-feed video, .camera-frame {
+.camera-feed video, .camera-frame, .camera-live-stream {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1273,6 +1273,34 @@ small, .mono, time, code, dt {
 .camera-frame {
   animation: cam-drift 26s ease-in-out infinite alternate;
   transform-origin: 60% 40%;
+}
+
+.camera-live-toggle-btn {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font: 600 8px var(--font-mono);
+  letter-spacing: 0.06em;
+  padding: 3px 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.camera-live-toggle-btn:hover { border-color: var(--primary); }
+
+.camera-live-error {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  padding: 5px 8px;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  border: 1px solid var(--critical);
+  font: 600 9px var(--font-mono);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .camera-nosignal {
@@ -1828,6 +1856,7 @@ small, .mono, time, code, dt {
 .alert-panel {
   overflow: hidden;
 }
+
 .alert-list {
   flex: 1 1 auto;
   min-height: 0;

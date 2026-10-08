@@ -1,4 +1,5 @@
 import cv2
+import platform
 
 
 class Camera:
@@ -21,10 +22,17 @@ class Camera:
 
         print("Opening USB camera...")
 
-        self.capture = cv2.VideoCapture(
-            self.camera_index,
-            cv2.CAP_V4L2,
+        # CAP_V4L2 is Linux-specific. Use DirectShow for Windows laptops,
+        # where this local fallback normally runs.
+        system = platform.system()
+        backend = (
+            cv2.CAP_DSHOW
+            if system == "Windows"
+            else cv2.CAP_V4L2
+            if system == "Linux"
+            else cv2.CAP_ANY
         )
+        self.capture = cv2.VideoCapture(self.camera_index, backend)
 
         if not self.capture.isOpened():
             self.capture = None

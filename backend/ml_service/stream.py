@@ -3,8 +3,8 @@ import time
 
 import cv2
 
-from .camera import Camera
-from .detector import HumanDetector
+from camera import Camera
+from detector import HumanDetector
 
 
 class MLStream:
