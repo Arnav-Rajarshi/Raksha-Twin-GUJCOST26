@@ -140,12 +140,14 @@ export function LiveCamera({
           <span className="cam-clock">{formatTime(clock)} UTC</span>
         </div>
 
-        <div className="target-box">
-          <span>
-            {targetType} {confidence}%
-          </span>
-          <Crosshair size={12} />
-        </div>
+        {!isLiveCamera && (
+          <div className="target-box">
+            <span>
+              {targetType} {confidence}%
+            </span>
+            <Crosshair size={12} />
+          </div>
+        )}
 
         <div className="camera-bottom">
           <span>{isLiveCamera ? `AI · YOLO ${cameraSource}` : "AI · YOLO ACTIVE"}</span>
