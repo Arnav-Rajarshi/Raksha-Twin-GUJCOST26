@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 # CONFIGURATION
 # ============================================================
 
-SERIAL_PORT = "COM12"
+SERIAL_PORT = "COM13"
 BAUD_RATE = 115200
 
 # IMPORTANT:
@@ -28,7 +28,7 @@ BACKEND_URL = "http://127.0.0.1:8000/sensors"
 # that your dashboard is currently using.
 
 ROBOT_ID = "RT001"
-MISSION_ID = "MI002"
+MISSION_ID = "MI007"
 
 
 # ============================================================
